@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KidCalm – Support Tool</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f1fb;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+      color: #1a1a2e;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #e2dcf5;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: #6b4ce6;
+      color: #fff;
+      padding: 28px 32px 24px;
+      text-align: center;
+    }
+    .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+    .header p  { font-size: 0.95rem; opacity: 0.85; }
+
+    .tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-top: 14px;
+    }
+    .tag {
+      font-size: 11px; font-weight: 600; padding: 4px 12px;
+      border-radius: 20px; letter-spacing: 0.03em;
+    }
+    .tag-adhd    { background: #d4e9ff; color: #0c4a8a; }
+    .tag-autism  { background: #e5e0ff; color: #3c2f8a; }
+    .tag-ptsd    { background: #fde9ca; color: #7a3d05; }
+    .tag-anxiety { background: #fce0ed; color: #7a1f45; }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      background: #fff1f1;
+      border-bottom: 1px solid #fdd;
+      padding: 12px 28px;
+      font-size: 12px;
+      color: #8b1a1a;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── MAIN BODY ── */
+    .body { padding: 32px 28px; }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #888;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* ── EMOTION GRID ── */
+    .emo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .emo-card {
+      background: #fff;
+      border: 1.5px solid #e8e4f4;
+      border-radius: 14px;
+      padding: 18px 10px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .emo-card:hover  { transform: translateY(-2px); border-color: #b8aee8; }
+    .emo-card:active { transform: scale(0.97); }
+    .emo-icon  { font-size: 28px; display: block; margin-bottom: 6px; }
+    .emo-label { font-size: 13px; font-weight: 600; color: #444; }
+
+    .emo-card.active.calm    { border-color: #1D9E75; background: #e1f5ee; }
+    .emo-card.active.happy   { border-color: #BA7517; background: #faeeda; }
+    .emo-card.active.sad     { border-color: #185FA5; background: #e6f1fb; }
+    .emo-card.active.angry   { border-color: #993C1D; background: #faece7; }
+    .emo-card.active.fearful { border-color: #534AB7; background: #eeedfe; }
+    .emo-card.active.anxious { border-color: #993556; background: #fbeaf0; }
+
+    /* ── TEXT INPUT ROW ── */
+    .input-row {
+      display: flex; gap: 10px;
+      margin-bottom: 32px;
+    }
+    .input-row input {
+      flex: 1;
+      font-size: 15px;
+      padding: 0 16px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1.5px solid #d0cbe8;
+      outline: none;
+      background: #fafafa;
+      color: #1a1a2e;
+      transition: border-color 0.2s;
+    }
+    .input-row input:focus { border-color: #6b4ce6; box-shadow: 0 0 0 3px rgba(107,76,230,0.15); }
+    .input-row button {
+      padding: 0 20px;
+      height: 42px;
+      border-radius: 10px;
+      border: none;
+      background: #6b4ce6;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .input-row button:hover  { background: #5a3cd1; }
+    .input-row button:active { transform: scale(0.97); }
+
+    /* ── RESPONSE CARD ── */
+    .response-card {
+      border-radius: 16px;
+      border: 1.5px solid #e0daf5;
+      overflow: hidden;
+      display: none;
+    }
+    .response-card.visible { display: block; }
+
+    .resp-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 22px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .resp-icon  { font-size: 32px; flex-shrink: 0; }
+    .resp-title { font-size: 20px; font-weight: 700; }
+    .resp-sub   { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+
+    .resp-body { padding: 20px 22px; }
+
+    .resp-tip {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 20px;
+      white-space: pre-line;
+    }
+
+    .panel {
+      background: #f7f5fd;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #8876c8;
+      margin-bottom: 10px;
+    }
+    .panel ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 14px;
+      color: #444;
+      line-height: 1.85;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .pill-adhd    { background: #d4e9ff; color: #0c4a8a; }
+    .pill-autism  { background: #e5e0ff; color: #3c2f8a; }
+    .pill-ptsd    { background: #fde9ca; color: #7a3d05; }
+    .pill-anxiety { background: #fce0ed; color: #7a1f45; }
+
+    .med-note {
+      font-size: 13px;
+      color: #777;
+      border-top: 1px solid #ede9f9;
+      padding-top: 14px;
+      margin-top: 4px;
+      line-height: 1.65;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 12px;
+      color: #aaa;
+      border-top: 1px solid #f0eef9;
+    }
+
+    @media (max-width: 480px) {
+      .emo-grid { grid-template-columns: repeat(2, 1fr); }
+      .body { padding: 24px 16px; }
+      .header h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>🌈 KidCalm</h1>
+    <p>A gentle support tool for children</p>
+    <div class="tags">
+      <span class="tag tag-adhd">ADHD</span>
+      <span class="tag tag-autism">Autism</span>
+      <span class="tag tag-ptsd">PTSD / Trauma</span>
+      <span class="tag tag-anxiety">Anxiety</span>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <strong>Educational prototype only</strong> — not a medical device or substitute for professional care.<br>
+    Always consult a doctor, therapist, or psychiatrist for real support.
+    If the child is in crisis, seek immediate help.
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <p class="section-label">How are you feeling right now?</p>
+
+    <!-- EMOTION CARDS -->
+    <div class="emo-grid" id="emoGrid">
+      <div class="emo-card calm"    onclick="selectEmo('calm',this)">   <span class="emo-icon">😊</span><span class="emo-label">Calm</span></div>
+      <div class="emo-card happy"   onclick="selectEmo('happy',this)">  <span class="emo-icon">😄</span><span class="emo-label">Happy</span></div>
+      <div class="emo-card sad"     onclick="selectEmo('sad',this)">    <span class="emo-icon">😢</span><span class="emo-label">Sad</span></div>
+      <div class="emo-card angry"   onclick="selectEmo('angry',this)">  <span class="emo-icon">😠</span><span class="emo-label">Angry</span></div>
+      <div class="emo-card fearful" onclick="selectEmo('fearful',this)"><span class="emo-icon">😨</span><span class="emo-label">Fearful</span></div>
+      <div class="emo-card anxious" onclick="selectEmo('anxious',this)"><span class="emo-icon">😟</span><span class="emo-label">Anxious</span></div>
+    </div>
+
+    <p class="section-label">Or type it below</p>
+
+    <!-- TEXT INPUT -->
+    <div class="input-row">
+      <input type="text" id="emoInput" placeholder="e.g. angry, sad, anxious, calm…" />
+      <button onclick="fromInput()">Check in</button>
+    </div>
+
+    <!-- RESPONSE CARD -->
+    <div class="response-card" id="responseCard">
+      <div class="resp-header" id="respHeader">
+        <span class="resp-icon" id="respIcon"></span>
+        <div>
+          <div class="resp-title" id="respTitle"></div>
+          <div class="resp-sub"   id="respSub"></div>
+        </div>
+      </div>
+      <div class="resp-body">
+        <div class="resp-tip" id="respTip"></div>
+
+        <div class="panel">
+          <div class="panel-title">Daily wellness tips</div>
+          <ul>
+            <li>Follow a predictable daily routine with a visual schedule</li>
+            <li>Use sensory tools — fidget toys, weighted blanket, noise-cancelling headphones</li>
+            <li>Take movement breaks between tasks</li>
+            <li>Practice naming feelings using pictures or emoji charts</li>
+            <li>Get enough sleep and time outdoors every day</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Evidence-based supports (professional guidance needed)</div>
+          <ul>
+            <li><span class="pill pill-adhd">ADHD</span> Behavioral parent training, school accommodations (IEP/504)</li>
+            <li><span class="pill pill-autism">Autism + Anxiety</span> Adapted CBT with visual supports</li>
+            <li><span class="pill pill-ptsd">PTSD / Trauma</span> Trauma-Focused CBT (TF-CBT)</li>
+            <li><span class="pill pill-anxiety">Generalized Anxiety</span> Play therapy or CBT</li>
+          </ul>
+        </div>
+
+        <div class="med-note">
+          <strong>Medications:</strong> Only use medicines prescribed by a doctor
+          (e.g. stimulants for ADHD, SSRIs for anxiety in some cases).
+          Never start or stop without medical advice.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <footer>Built with ❤️ for kids &nbsp;|&nbsp; This is a helpful guide, not a doctor</footer>
+
+</div><!-- /container -->
+
+<script>
+  const emotions = ['calm','happy','sad','angry','fearful','anxious'];
+
+  const data = {
+    calm: {
+      icon: '😊', title: 'Calm', sub: "You're in a good space",
+      tip: "Great! Let's keep this peaceful energy going.\n\nTry a short breathing exercise:\nBreathe in for 4 counts → hold for 2 → breathe out for 6 counts.\n\nThis helps your brain stay relaxed and focused.",
+      bg: '#e1f5ee', border: '#1D9E75', titleColor: '#085041'
+    },
+    happy: {
+      icon: '😄', title: 'Happy', sub: "You're feeling great!",
+      tip: "Awesome! Channel this energy into something fun — drawing, dancing, or playing with your favourite toy.\n\nHappy moments are a great time to try something new or creative!",
+      bg: '#faeeda', border: '#BA7517', titleColor: '#633806'
+    },
+    sad: {
+      icon: '😢', title: 'Sad', sub: "It's okay to feel sad",
+      tip: "Sadness is a normal feeling — it usually passes when we give it space.\n\nWould you like a cosy corner with soft toys or blankets?\nOr maybe listen to a favourite calm song.\n\nYou don't have to feel better right away.",
+      bg: '#e6f1fb', border: '#185FA5', titleColor: '#0C447C'
+    },
+    angry: {
+      icon: '😠', title: 'Angry', sub: "Big feelings are normal",
+      tip: "Big angry feelings are okay. Try these safe ideas:\n\n• Squeeze a stress ball or pillow\n• Do 'heavy work' — push your palms against a wall for 10 seconds\n• Jump or run in place for one minute\n• Take 5 slow deep breaths\n\nAnger is energy — let's move it safely.",
+      bg: '#faece7', border: '#993C1D', titleColor: '#712B13'
+    },
+    fearful: {
+      icon: '😨', title: 'Fearful', sub: "Let's ground ourselves",
+      tip: "Feeling scared? Let's do a grounding exercise together:\n\n• Name 5 things you can SEE\n• 4 things you can TOUCH\n• 3 things you can HEAR\n• 2 things you can SMELL\n• 1 thing you can TASTE\n\nThis tells your brain: you are safe right now.",
+      bg: '#eeedfe', border: '#534AB7', titleColor: '#3C3489'
+    },
+    anxious: {
+      icon: '😟', title: 'Anxious', sub: "We can calm this together",
+      tip: "Feeling anxious? Try this:\n\n• Slow breathing — breathe in for 4, breathe out for 8\n• Hold a favourite stuffed toy or soft object\n• Think of your 'safe place' (real or imaginary)\n• Remind yourself: this feeling will pass\n\nYou are not alone.",
+      bg: '#fbeaf0', border: '#993556', titleColor: '#72243E'
+    },
+    neutral: {
+      icon: '🤔', title: 'Hmm…', sub: "Let's check in",
+      tip: "Not sure how you're feeling? That's okay too.\n\nTry naming one thing that's on your mind right now.\nSometimes just saying it out loud — or to a trusted person — can help.",
+      bg: '#f1efea', border: '#888780', titleColor: '#444441'
+    }
+  };
+
+  function selectEmo(emo, card) {
+    document.querySelectorAll('.emo-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    showResponse(emo);
+  }
+
+  function fromInput() {
+    const val = document.getElementById('emoInput').value.trim().toLowerCase();
+    let found = 'neutral';
+    for (const e of emotions) { if (val.includes(e)) { found = e; break; } }
+    document.querySelectorAll('.emo-card').forEach(c => {
+      c.classList.remove('active');
+      if (c.classList.contains(found)) c.classList.add('active');
+    });
+    showResponse(found);
+  }
+
+  function showResponse(emo) {
+    const d = data[emo] || data.neutral;
+    const card   = document.getElementById('responseCard');
+    const header = document.getElementById('respHeader');
+
+    document.getElementById('respIcon').textContent  = d.icon;
+    document.getElementById('respTitle').textContent = d.title;
+    document.getElementById('respTitle').style.color = d.titleColor;
+    document.getElementById('respSub').textContent   = d.sub;
+    document.getElementById('respSub').style.color   = d.titleColor;
+    document.getElementById('respTip').textContent   = d.tip;
+
+    card.style.borderColor   = d.border;
+    header.style.background  = d.bg;
+
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.getElementById('emoInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fromInput();
+  });
+</script>
+
+</body>
+</html>
